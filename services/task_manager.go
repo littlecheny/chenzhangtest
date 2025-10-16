@@ -12,14 +12,22 @@ import (
 type TaskManager struct {
 	mu              sync.RWMutex
 	tasks           []domain.Task
+	Algo            string
 	scheduleService domain.Schedule
 }
 
 func NewTaskManager() *TaskManager {
 	return &TaskManager{
+		Algo:            "FIFO",
 		tasks:           make([]domain.Task, 0),
 		scheduleService: NewFIFOScheduleService(),
 	}
+}
+
+func (m *TaskManager) ChangeStrategy(algo string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.Algo = algo
 }
 
 // AddTasks 将任务追加到用户维度的任务列表中，设置 UserID，并做切片拷贝以避免外部修改内部状态
@@ -29,6 +37,7 @@ func (m *TaskManager) AddTasks(userID string, tasks []domain.Task) error {
 
 	for _, t := range tasks {
 		// 绑定用户ID
+		t.UserID = userID
 		m.tasks = append(m.tasks, t)
 	}
 	return nil
@@ -48,8 +57,6 @@ func (m *TaskManager) Snapshot() ([]domain.Task, error) {
 // ScheduleNow 基于当前快照执行调度，并将结果合并回用户任务列表（加写锁）
 func (m *TaskManager) ScheduleNow(t time.Time, algo string) (domain.SchedulerState, error) {
 	// TODO: 根据 algo 选择具体算法；当前使用默认 scheduleService。
-	_ = algo
-
 	// 读取快照不阻塞写操作
 	tasks, _ := m.Snapshot()
 
@@ -57,8 +64,14 @@ func (m *TaskManager) ScheduleNow(t time.Time, algo string) (domain.SchedulerSta
 		return domain.SchedulerState{Time: t}, nil
 	}
 
-	stats := m.scheduleService.Schedule(t, tasks)
-
+	// 根据算法选择调度方法
+	var stats domain.SchedulerState
+	switch algo {
+	case "FIFO":
+		stats = m.scheduleService.FIFOSchedule(t, tasks)
+	default:
+		stats = m.scheduleService.SRFTSchedule(t, tasks)
+	}
 	// 合并结果需要写锁，避免与其他写操作竞争
 	m.mu.Lock()
 	updated := m.scheduleService.MergeTask(m.tasks, stats)

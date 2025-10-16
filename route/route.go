@@ -8,4 +8,5 @@ import (
 func Setup(r *gin.Engine, taskManager *services.TaskManager) {
 	publicRoute := r.Group("")
 	newScheduleRoute(publicRoute, taskManager)
+	newStrategyRoute(publicRoute, taskManager)
 }
