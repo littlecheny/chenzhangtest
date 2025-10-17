@@ -63,7 +63,7 @@ func (m *TaskManager) ScheduleNow(t time.Time, algo string) (domain.SchedulerSta
 	if len(tasks) == 0 {
 		return domain.SchedulerState{Time: t}, nil
 	}
-
+	fmt.Println(algo)
 	// 根据算法选择调度方法
 	var stats domain.SchedulerState
 	switch algo {
@@ -86,13 +86,16 @@ func (m *TaskManager) Clear(userID string) error {
 }
 
 // ScheduleLoop 后台持续执行调度，以固定间隔遍历所有用户并触发一次调度
-func (m *TaskManager) ScheduleLoop(ctx context.Context, interval time.Duration, algo string) {
+func (m *TaskManager) ScheduleLoop(ctx context.Context, interval time.Duration) {
 	if interval <= 0 {
 		interval = time.Second
 	}
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
+		m.mu.RLock()
+		algo := m.Algo
+		m.mu.RUnlock()
 		select {
 		case <-ctx.Done():
 			return

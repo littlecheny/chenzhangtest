@@ -18,7 +18,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go taskManager.ScheduleLoop(ctx, time.Second, taskManager.Algo)
+	go taskManager.ScheduleLoop(ctx, time.Second)
 
 	r.Run(":8080")
 }

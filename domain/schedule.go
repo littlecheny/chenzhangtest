@@ -5,7 +5,8 @@ import (
 )
 
 type Schedule interface {
-	Schedule(t time.Time, tasks []Task) SchedulerState
+	FIFOSchedule(t time.Time, tasks []Task) SchedulerState
+	SRFTSchedule(t time.Time, tasks []Task) SchedulerState
 	MergeTask(tasks []Task, stats SchedulerState) []Task
 }
 

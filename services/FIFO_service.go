@@ -45,6 +45,9 @@ func (s *ScheduleService) SRFTSchedule(t time.Time, tasks []domain.Task) domain.
 	stats := domain.SchedulerState{
 		Time: t,
 	}
+	slices.SortFunc(tasks, func(a, b domain.Task) int {
+		return a.BurstTime - b.BurstTime
+	})
 	for _, task := range tasks {
 		if 0 < resource {
 			consume := min(resource, task.BurstTime)

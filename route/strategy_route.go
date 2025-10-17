@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func newStrategyRoute(publicRoute *gin.RouterGroup, taskManager *services.TaskMa
 			return
 		}
 		taskManager.ChangeStrategy(req.Algo)
+		fmt.Printf("strategy changed to %s\n", req.Algo)
 		c.JSON(http.StatusOK, gin.H{"message": "strategy changed"})
 	})
 }
