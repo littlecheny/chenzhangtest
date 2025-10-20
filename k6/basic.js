@@ -9,9 +9,10 @@ export const options = {
 const BASE = __ENV.BASE_URL || 'http://localhost:8080';
 
 export default function () {
+  const randBurst = () => Math.floor(1 + Math.random() * 100); // 1-100 随机
   const payload = JSON.stringify([
-    { Index: 1, ArrivalTime: 0, BurstTime: 5 },
-    { Index: 2, ArrivalTime: 1, BurstTime: 3 },
+    { Index: 1, BurstTime: randBurst() },
+    { Index: 2, BurstTime: randBurst() },
   ]);
   const headers = { 'Content-Type': 'application/json', 'X-User-ID': 'user1' };
   const res = http.post(`${BASE}/submitasks`, payload, { headers });

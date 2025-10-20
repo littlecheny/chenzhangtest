@@ -63,7 +63,6 @@ func (m *TaskManager) ScheduleNow(t time.Time, algo string) (domain.SchedulerSta
 	if len(tasks) == 0 {
 		return domain.SchedulerState{Time: t}, nil
 	}
-	fmt.Println(algo)
 	// 根据算法选择调度方法
 	var stats domain.SchedulerState
 	switch algo {
